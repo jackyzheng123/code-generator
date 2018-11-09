@@ -1,0 +1,24 @@
+package ${package}.core.service.impl;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.Map;
+
+import ${package}.core.dao.${className}Dao;
+import ${package}.core.model.${className}Entity;
+import ${package}.core.service.${className}Service;
+
+
+
+@Service("${classname}Service")
+public class ${className}ServiceImpl extends BaseMybatisServiceImpl<${className}Entity,Long> implements ${className}Service {
+	@Autowired
+	private ${className}Dao ${classname}Dao;
+
+    @Override
+    public BaseMapper<${className}Entity, Long> getBaseMapper() {
+        return this.${classname}Dao;
+    }
+}

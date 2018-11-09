@@ -1,0 +1,275 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="${package}.dao.${className}Dao">
+
+    <!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="${package}.model.${className}Entity" id="${classname}Map">
+        #foreach($column in $columns)
+            <result property="${column.attrname}" column="${column.columnName}"/>
+        #end
+    </resultMap>
+    <sql id="tablename">
+        ${tableName}
+    </sql>
+    <sql id="base_Column_List">
+    #foreach($column in $columns)
+    $column.columnName
+    #if($velocityCount != $columns.size())
+    ,#end
+    #end
+    </sql>
+    <select id="selectByPrimaryKey" resultMap="${classname}Map" >
+        select <include refid="base_Column_List"/> from  <include refid="tablename"/> where ${pk.columnName} = #{value}
+    </select>
+
+    <select id="selectList" resultMap="${classname}Map">
+        select <include refid="base_Column_List"/> from  <include refid="tablename"/>
+        <choose>
+            <when test="sidx != null and sidx.trim() != ''">
+                order by ${sidx} ${order}
+            </when>
+            <otherwise>
+                order by ${pk.columnName} desc
+            </otherwise>
+        </choose>
+        <if test="offset != null and limit != null">
+            limit #{offset}, #{limit}
+        </if>
+    </select>
+
+    <select id="selectAll" resultMap="${classname}Map">
+        select <include refid="base_Column_List"/> from  <include refid="tablename"/>
+    </select>
+
+    <select id="selectTotal" resultType="int">
+        select count(*) from  <include refid="tablename"/>
+    </select>
+
+
+
+    <select id="selectByModel" resultMap="${classname}Map">
+        select <include refid="base_Column_List"/> from  <include refid="tablename"/>
+          where
+        <trim prefix="" suffixOverrides="and">
+            #foreach($column in $columns)
+                    <if test="${column.attrname} != null">
+                        `$column.columnName` = #{$column.attrname} and
+                    </if>
+            #end
+         </trim>
+    </select>
+
+
+    <insert id="insertAndReturnId" parameterType="${package}.core.model.${className}Entity"#if($pk.extra ==
+        'auto_increment') useGeneratedKeys="true" keyProperty="$pk.attrname"#end>
+        insert into  <include refid="tablename"/>
+        (
+#foreach($column in $columns)
+#if($column.columnName != $pk.columnName || $pk.extra != 'auto_increment')
+`$column.columnName`
+    #if($velocityCount != $columns.size()), #end
+#end
+#end
+        )
+        values
+        (
+#foreach($column in $columns)
+#if($column.columnName != $pk.columnName || $pk.extra != 'auto_increment')
+#{$column.attrname}
+#if($velocityCount != $columns.size()), #end
+#end
+#end
+        )
+    </insert>
+
+    <insert id="insert" parameterType="${package}.core.model.${className}Entity">
+        insert into  <include refid="tablename"/>
+        (
+#foreach($column in $columns)
+    #if($column.columnName != $pk.columnName || $pk.extra != 'auto_increment')
+    `$column.columnName`#if($velocityCount != $columns.size()),
+    #end
+    #end
+    #end
+        )values
+        (
+#foreach($column in $columns)
+    #if($column.columnName != $pk.columnName || $pk.extra != 'auto_increment')
+    #{$column.attrname}
+    #if($velocityCount != $columns.size()),
+    #end
+    #end
+#end)
+    </insert>
+
+
+    <insert id="insertBatch" parameterType="java.util.List">
+        insert into  <include refid="tablename"/>
+        (
+        #foreach($column in $columns)
+            #if($column.columnName != $pk.columnName || $pk.extra != 'auto_increment')
+                `$column.columnName`
+                #if($velocityCount != $columns.size())
+                    ,
+                #end
+            #end
+        #end
+        )
+        values
+        (
+        <foreach item="model" index="index" collection="list">(
+        #foreach($column in $columns)
+            #if($column.columnName != $pk.columnName || $pk.extra != 'auto_increment')
+                #{model.$column.attrname}
+                #if($velocityCount != $columns.size())
+                    ,
+                #end
+            #end
+        #end)
+        </foreach>
+        )
+    </insert>
+
+    <insert id="insertSelectiveAndReturnId" parameterType="${package}.core.model.${className}Entity"#if($pk.extra ==
+        'auto_increment') useGeneratedKeys="true" keyProperty="$pk.attrname"#end>
+        insert into  <include refid="tablename"/>
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            #foreach($column in $columns)
+                #if($column.columnName != $pk.columnName || $pk.extra != 'auto_increment')
+                    <if test="${column.attrname} != null">
+                        `$column.columnName`,
+                    </if>
+                #end
+            #end
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+
+            #foreach($column in $columns)
+                #if($column.columnName != $pk.columnName || $pk.extra != 'auto_increment')
+                    <if test="${column.attrname} != null">
+                        #{$column.attrname},
+                    </if>
+
+                #end
+            #end
+        </trim>
+    </insert>
+
+    <insert id="insertSelective" parameterType="${package}.core.model.${className}Entity">
+        insert into  <include refid="tablename"/>
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            #foreach($column in $columns)
+                #if($column.columnName != $pk.columnName || $pk.extra != 'auto_increment')
+                    <if test="${column.attrname} != null">
+                        `$column.columnName`,
+                    </if>
+                #end
+            #end
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            #foreach($column in $columns)
+                #if($column.columnName != $pk.columnName || $pk.extra != 'auto_increment')
+                    <if test="${column.attrname} != null">
+                        #{$column.attrname},
+                    </if>
+
+                #end
+            #end
+        </trim>
+    </insert>
+
+
+    <insert id="insertSelectiveBatch" parameterType="java.util.List">
+        insert into  <include refid="tablename"/>
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            #foreach($column in $columns)
+                #if($column.columnName != $pk.columnName || $pk.extra != 'auto_increment')
+                    <if test="${column.attrname} != null">
+                        `$column.columnName`,
+                    </if>
+                #end
+            #end
+        </trim>
+        values
+        <foreach item="model" index="index" collection="list">
+            <trim prefix="values (" suffix=")" suffixOverrides=",">
+                #foreach($column in $columns)
+                    #if($column.columnName != $pk.columnName || $pk.extra != 'auto_increment')
+                        <if test="${column.attrname} != null">
+                            #{model.$column.attrname},
+                        </if>
+
+                    #end
+                #end
+            </trim>
+        </foreach>
+    </insert>
+
+
+
+    <update id="updateByPrimaryKeySelective" parameterType="${package}.core.model.${className}Entity">
+        update  <include refid="tablename"/>
+        <set>
+            #foreach($column in $columns)
+                #if($column.columnName != $pk.columnName)
+                    <if test="$column.attrname != null">`$column.columnName` = #{$column.attrname}#if($velocityCount != $columns.size()), #end</if>
+                #end
+            #end
+        </set>
+        where ${pk.columnName} = #{${pk.attrname}}
+    </update>
+
+
+    <update id="updateByPrimaryKey" parameterType="${package}.core.model.${className}Entity">
+        update  <include refid="tablename"/>
+        <set>
+            #foreach($column in $columns)
+                #if($column.columnName != $pk.columnName)
+                    `$column.columnName` = #{$column.attrname}
+                    #if($velocityCount != $columns.size()),
+                    #end
+                #end
+            #end
+        </set>
+        where ${pk.columnName} = #{${pk.attrname}}
+    </update>
+
+    <update id="updateByModel" parameterType="${package}.core.model.${className}Entity">
+        update  <include refid="tablename"/>
+        <set>
+            #foreach($column in $columns)
+                <if test="upateData.${column.attrname} != null">
+                    #if($column.columnName != $pk.columnName)
+                        `$column.columnName` = #{upateData.$column.attrname}
+                        #if($velocityCount != $columns.size()),
+                        #end
+                    #end
+                </if>
+
+            #end
+        </set>
+        where
+        <trim prefix="" suffixOverrides="and">
+            #foreach($column in $columns)
+                <if test="criteriaData.${column.attrname} != null">
+                    `$column.columnName` = #{criteriaData.$column.attrname}and
+                  
+                </if>
+            #end
+        </trim>
+    </update>
+
+
+    <delete id="deleteByPrimaryKey">
+        delete from  <include refid="tablename"/> where ${pk.columnName} = #{value}
+    </delete>
+
+    <delete id="deleteByPrimaryKeyBatch">
+        delete from  <include refid="tablename"/> where ${pk.columnName} in
+        <foreach item="${pk.attrname}" collection="array" open="(" separator="," close=")">
+            #{${pk.attrname}}
+        </foreach>
+    </delete>
+
+</mapper>

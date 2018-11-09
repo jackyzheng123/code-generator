@@ -1,0 +1,18 @@
+package ${package}.core.service;
+
+import ${package}.core.model.${className}Entity;
+
+import java.util.List;
+import java.util.Map;
+
+/**
+ * ${comments}
+ * 
+ * @author ${author}
+ * @email ${email}
+ * @date ${datetime}
+ */
+public interface ${className}Service extends BaseMybatisService<${className}Entity,Long>{
+	
+
+}

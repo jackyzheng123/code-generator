@@ -1,0 +1,16 @@
+package ${package}.core.dao;
+
+import ${package}.model.${className}Entity;
+import org.apache.ibatis.annotations.Mapper;
+import com.fastboot.database.BaseMapper;
+
+/**
+ * ${comments}
+ * 
+ * @author ${author}
+ * @email ${email}
+ * @date ${datetime}
+ */
+public interface ${className}Dao extends BaseMapper<${className}Entity,Long> {
+	
+}
